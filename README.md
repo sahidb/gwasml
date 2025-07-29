@@ -1,93 +1,128 @@
-# gwasml
+Berikut adalah contoh README.md untuk program pipeline GWAS-with-ML versi modular Python (dengan plotting, parameter .env, dan berbasis conda/docker):
 
+# GWAS-with-ML Pipeline
 
+Pipeline ini menyediakan analisis Genome-Wide Association Study (GWAS) terintegrasi Machine Learning untuk deteksi, validasi, dan interpretasi varian genetika terkait fenotipe kompleks. Versi ini sepenuhnya modular dalam Python, dapat dijalankan di lingkungan conda maupun Docker Compose, dan mendukung parameterisasi dinamis melalui `.env`.
 
-## Getting started
+## Fitur Utama
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+- **Quality Control** (Plink2): Otomatis pembersihan data genotipe (.bed/.bim/.fam)
+- **Feature Selection**: Seleksi SNP relevan dengan LASSO, Ridge, ElasticNet, Mutual Information
+- **Association Analysis**: Model ML (Linear Regression, Random Forest, SVR, XGBoost) untuk prediksi & ranking SNP
+- **Performance Plotting**: Grafik per model (R², MAE) secara otomatis, tersimpan di `data/image`
+- **Post-GWAS Analysis**: Validasi biologis/top SNP dengan enrichment (pybiomart, Ensembl)
+- **Parameter via `.env`**: Semua threshold, n-top, alpha, dst. dipisahkan dalam file config yang mudah diubah
+- **Mudah dijalankan di Docker/Conda**: Satu perintah, tanpa edit kode utama
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## Struktur Direktori
 
 ```
-cd existing_repo
-git remote add origin https://git.brin.go.id/sahi001/gwasml.git
-git branch -M main
-git push -uf origin main
+.
+├── gwas_pipeline.py         # Skrip utama pipeline (modular & siap produksi)
+├── environment.yml          # Definisi environment Conda (semua dependency)
+├── Dockerfile               # Dockerfile Miniconda untuk containerisasi
+├── docker-compose.yml       # Konfigurasi Docker Compose
+├── .env                     # Parameter pipeline (threshold, alpha, dsb)
+├── data/
+│   ├── input_prefix.*       # Data genotipe (.bed, .bim, .fam hasil QC)
+│   ├── phenotype.csv        # File fenotipe (see format below)
+│   └── image/               # Output grafik per model ML
+└── README.md                # Dokumen ini
 ```
 
-## Integrate with your tools
+## Prasyarat
 
-- [ ] [Set up project integrations](https://git.brin.go.id/sahi001/gwasml/-/settings/integrations)
+- **Conda (Miniconda/Anaconda)** ATAU Docker
+- Untuk Docker: docker & docker-compose/buildx terbaru
 
-## Collaborate with your team
+## Cara Instalasi & Pemakaian
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+### 1. Jalankan di Conda
 
-## Test and Deploy
+1. **Buat environment:**
+    ```bash
+    conda env create -f environment.yml
+    conda activate gwasml
+    ```
+2. **Edit `.env` (opsional):** Atur threshold, n-features dsb sesuai kebutuhan.
+3. **Jalankan pipeline:**
+    ```bash
+    python gwas_pipeline.py data/input_prefix data/phenotype.csv
+    ```
 
-Use the built-in continuous integration in GitLab.
+### 2. Jalankan di Docker Compose
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+1. **Build image:**
+    ```bash
+    docker compose build
+    ```
+2. **Jalankan pipeline:**
+    ```bash
+    docker compose up -d    # Detached (background); cek log dengan docker compose logs -f gwasml
+    ```
+    Atau override input files:
+    ```bash
+    docker compose run gwasml data/input_prefix data/phenotype.csv
+    ```
 
-***
+3. **Hasil (grafik, enrichment) di-folder**:
+    - `data/image/` untuk plot R²/MAE per model
+    - `enrichment.csv` untuk hasil validasi biologis SNP
 
-# Editing this README
+## Format Data Input
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Data Genotipe
+- File trio: `input_prefix.bed/.bim/.fam` (Plink format hasil QC atau mentah)
+- Setelah QC otomatis, file hasil di `data/qc_output.*`
 
-## Suggestions for a good README
+### File Fenotipe (`phenotype.csv`)
+```csv
+FamID,CAD,sex,age,tg,hdl,ldl
+10002,1,1,60,NA,NA,NA
+10004,1,2,50,55,23,75
+...
+```
+- Minimal: kolom ID (FamID/IID) dan target fenotipe (misal: LDL)
+- NA boleh, akan di-handle di preprocessing
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## Cara Setting Parameter
 
-## Name
-Choose a self-explaining name for your project.
+Edit file `.env` untuk threshold, n-features, alpha, dsb:
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```
+FEATURE_SELECTION_N_FEATURES=5000
+FEATURE_SELECTION_LASSO_ALPHA=0.00045
+ASSOCIATION_RF_N_ESTIMATORS=100
+...
+```
+**Cukup ubah file .env – tanpa edit kode Python!**
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## Skema Pipeline
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+```mermaid
+flowchart TD
+  A([Mulai]) --> B([Input Genotipe & Fenotipe])
+  B --> C([Quality Control (Plink2)])
+  C --> D([Feature Selection ML])
+  D --> E([Association Analysis ML])
+  E --> F([Performance Plot & Top SNPs])
+  F --> G([Post-GWAS Analysis / Enrichment])
+  G --> H([Output: Grafik, CSV, SNP Signifikan])
+  H --> I([Selesai])
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## Troubleshooting
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+- Jika error buildx: install buildx plugin (lihat README troubleshooting)
+- Jika log kosong: cek path folder `data` & isi file input benar
+- Jika docker: selalu build dulu (`docker compose build`)
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+## Lisensi dan Credit
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+- Berbasis pada pipeline dan protokol GWAS-with-ML (Vaishnavi Jangale et al, PennCATH).
+- Kode modular ini bebas diadaptasi untuk riset dan pendidikan.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+**Q & A**  
+Untuk pertanyaan lebih lanjut atau contoh data, silakan hubungi maintainer repo.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+---
