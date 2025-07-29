@@ -101,14 +101,43 @@ ASSOCIATION_RF_N_ESTIMATORS=100
 
 ```mermaid
 flowchart TD
-  A([Mulai]) --> B([Input Genotipe & Fenotipe])
-  B --> C([Quality Control (Plink2)])
-  C --> D([Feature Selection ML])
-  D --> E([Association Analysis ML])
-  E --> F([Performance Plot & Top SNPs])
-  F --> G([Post-GWAS Analysis / Enrichment])
-  G --> H([Output: Grafik, CSV, SNP Signifikan])
-  H --> I([Selesai])
+    %% Proses utama tetap berjalan kiri ke kanan
+    A([Mulai]) --> B
+    B --> C
+    C -->|filter SNP: geno, mind, MAF, LD, HWE, kinship| D
+    D --> E
+    E -->|Metode ML: LASSO, Ridge, ElasticNet, Mutual Information| F
+    F --> G
+    G -->|Model: LinearRegression, RF, SVR, XGBoost| H
+    H --> I
+    I -->|Query ke Ensembl via pybiomart, eQTL, Pathway| J
+    J --> K
+    K --> L
+    L --> M([Selesai])
+
+    %% Subgraph akan tersusun horizontal (kiri ke kanan)
+    subgraph Data_Handling [Data Handling]
+        direction TB
+        B([Input Data Genotipe .bed/.bim/.fam dan Fenotipe phenotype.csv])
+        C([Quality Control QC dengan Plink2])
+        D([Data Genotipe setelah QC])
+    end
+
+    subgraph Machine_Learning_Pipeline [Machine Learning Pipeline]
+        direction TB
+        E([Feature Selection Seleksi SNP])
+        F([Top SNP Terpilih ~5000])
+        G([Association Analysis ML])
+        H([Metrik Performance R², MAE, Top SNP Penting])
+    end
+
+    subgraph Biological_Validation [Biological Validation]
+        direction TB
+        I([Post-GWAS Analysis Validasi Biologis])
+        J([Hasil Enrichment & Validasi SNP CSV, Figure])
+        K([Optional: Imputasi/Rare Variants Simulation])
+    end
+
 ```
 
 ## Troubleshooting
