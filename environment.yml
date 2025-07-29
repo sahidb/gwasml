@@ -1,0 +1,16 @@
+name: gwasml
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.10
+  - plink2
+  - pandas
+  - numpy
+  - scikit-learn
+  - xgboost
+  - pybiomart
+  - joblib
+  - scipy
+  - matplotlib
+  - python-dotenv

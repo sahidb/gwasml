@@ -1,0 +1,6 @@
+services:
+  gwasml:
+    build: .
+    volumes:
+      - ./data:/app/data
+    command: ["data/input_prefix", "data/phenotype.csv"]  # Override default parameter main()
