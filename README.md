@@ -1,5 +1,3 @@
-Berikut adalah contoh README.md untuk program pipeline GWAS-with-ML versi modular Python (dengan plotting, parameter .env, dan berbasis conda/docker):
-
 # GWAS-with-ML Pipeline
 
 Pipeline ini menyediakan analisis Genome-Wide Association Study (GWAS) terintegrasi Machine Learning untuk deteksi, validasi, dan interpretasi varian genetika terkait fenotipe kompleks. Versi ini sepenuhnya modular dalam Python, dapat dijalankan di lingkungan conda maupun Docker Compose, dan mendukung parameterisasi dinamis melalui `.env`.
