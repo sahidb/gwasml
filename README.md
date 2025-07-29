@@ -110,8 +110,7 @@ flowchart TD
     H --> I
     I -->|Query ke Ensembl via pybiomart, eQTL, Pathway| J
     J --> K
-    K --> L
-    L --> M([Selesai])
+    K --> M([Selesai])
 
     %% Subgraph akan tersusun horizontal (kiri ke kanan)
     subgraph Data_Handling [Data Handling]
