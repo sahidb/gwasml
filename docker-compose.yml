@@ -1,6 +1,8 @@
 services:
   gwasml:
-    build: .
+    image: gwasml-gwasml:latest
+    container_name: gwasml
     volumes:
-      - ./data:/app/data
-    command: ["data/input_prefix", "data/phenotype.csv"]  # Override default parameter main()
+      - ./data:/app/data   # Sinkronisasi folder data lokal ke dalam container
+    command: ["data/input_prefix", "data/phenotype.csv"]  # Ganti sesuai input Anda
+    tty: true
