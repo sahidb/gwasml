@@ -1,5 +1,8 @@
 services:
   gwasml:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: gwasml-gwasml:latest
     container_name: gwasml
     volumes:
