@@ -16,4 +16,4 @@ COPY . .
 RUN mkdir -p data/image
 
 # Set default entrypoint (gunakan argumen untuk override input/output filenya)
-ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "gwasml", "python", "gwas_pipeline.py"]
+ENTRYPOINT ["conda", "run", "--no-capture-output", "-n", "gwasml", "python", "gwas_ml.py"]
